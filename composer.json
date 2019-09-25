@@ -1,0 +1,44 @@
+{
+    "name": "itk-dev/user-management-bundle",
+    "description": "User management made easier",
+    "type": "symfony-bundle",
+    "require": {
+        "friendsofsymfony/user-bundle": "^2.1",
+        "symfony/framework-bundle": "^4.0",
+        "twig/twig": "^2.11"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Mikkel Ricky",
+            "email": "rimi@aarhus.dk"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "ItkDev\\UserManagementBundle\\": "src/"
+        }
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^2.15",
+        "friendsoftwig/twigcs": "^3.1"
+    },
+    "scripts": {
+        "check-coding-standards/php-cs-fixer": [
+            "php-cs-fixer --config=.php_cs.dist fix --dry-run"
+        ],
+        "check-coding-standards/twigcs": [
+            "twigcs lint src/Resources/views/"
+        ],
+        "check-coding-standards": [
+            "@check-coding-standards/php-cs-fixer",
+            "@check-coding-standards/twigcs"
+        ],
+        "apply-coding-standards/php-cs-fixer": [
+            "php-cs-fixer --config=.php_cs.dist fix"
+        ],
+        "apply-coding-standards": [
+            "@apply-coding-standards/php-cs-fixer"
+        ]
+    }
+}
