@@ -17,10 +17,8 @@ class CompilerPass implements CompilerPassInterface
 {
     public function process(ContainerBuilder $container)
     {
-        $twigLoaderId = 'twig.loader.native_filesystem';
-        if ($container->hasDefinition($twigLoaderId)) {
-            $loader = $container->getDefinition($twigLoaderId);
-
+        $loader = $this->getTwigLoader($container);
+        if (null !== $loader) {
             // Prepend our path to FOSUser templates.
             $namespace = 'FOSUser';
 
@@ -37,5 +35,20 @@ class CompilerPass implements CompilerPassInterface
                 $loader->addMethodCall('prependPath', [$path, $namespace]);
             }
         }
+    }
+
+    private function getTwigLoader(ContainerBuilder $container)
+    {
+        foreach ([
+            'twig.loader',
+            'twig.loader.filesystem',
+            'twig.loader.native_filesystem',
+        ] as $id) {
+            if ($container->hasDefinition($id)) {
+                return $container->getDefinition($id);
+            }
+        }
+
+        return null;
     }
 }
