@@ -67,8 +67,14 @@ class UserManager extends BaseUserManager
 
     public function updateUser(UserInterface $user, $andFlush = true)
     {
+        $isNew = null === $user->getId();
         $user->setUsername($user->getEmail());
         parent::updateUser($user, $andFlush);
+
+        if ($isNew && $this->configuration['notify_user_on_create']) {
+            // @TODO: Add flash bag message here?
+            $this->notifyUserCreated($user);
+        }
     }
 
     public function notifyUserCreated(User $user, $andFlush = true)

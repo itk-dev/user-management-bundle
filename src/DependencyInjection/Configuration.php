@@ -46,6 +46,11 @@ BODY
             ->scalarNode('text')->isRequired()->example('Choose password')->end()
             ->end()->end()
             ->scalarNode('footer')->example('<p style="margin: 0;">Best regards,<br/> {{ site_name }}</p>')->end()
+            ->end()
+            ->end()
+
+            ->booleanNode('notify_user_on_create')->isRequired()->defaultFalse()->info('If set, new users will be notified via email about their account.')->end()
+
             ->end();
 
         return $treeBuilder;
