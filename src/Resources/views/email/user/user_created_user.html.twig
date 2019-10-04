@@ -7,6 +7,7 @@
 {% endblock %}
 
 {% block body %}
+    {{ message|default(false) ? message|raw }}
     {{ body|raw }}
 {% endblock %}
 

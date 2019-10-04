@@ -23,12 +23,12 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder('itk_dev_user_management');
         $treeBuilder->getRootNode()
             ->children()
-            ->scalarNode('site_url')->isRequired()->example('example.com')->end()
-            ->scalarNode('site_name')->isRequired()->example('My site')->end()
+            ->scalarNode('site_url')->isRequired()->defaultValue('%env(SITE_URL)%')->end()
+            ->scalarNode('site_name')->isRequired()->example('%env(SITE_NAME)%')->end()
 
-            ->arrayNode('sender')->children()
-            ->scalarNode('email')->isRequired()->end()
-            ->scalarNode('name')->end()
+            ->arrayNode('sender')->isRequired()->children()
+            ->scalarNode('email')->isRequired()->defaultValue('%env(MAILER_EMAIL)%')->end()
+            ->scalarNode('name')->isRequired()->defaultValue('%env(MAILER_NAME)%')->end()
             ->end()
             ->end()
 

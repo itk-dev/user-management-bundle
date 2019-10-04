@@ -12,6 +12,8 @@ namespace ItkDev\UserManagementBundle\Doctrine;
 
 use Doctrine\Common\Persistence\ObjectManager;
 use FOS\UserBundle\Doctrine\UserManager as BaseUserManager;
+use FOS\UserBundle\Mailer\MailerInterface;
+use FOS\UserBundle\Model\User;
 use FOS\UserBundle\Model\UserInterface;
 use FOS\UserBundle\Util\CanonicalFieldsUpdater;
 use FOS\UserBundle\Util\PasswordUpdaterInterface;
@@ -19,21 +21,25 @@ use FOS\UserBundle\Util\TokenGeneratorInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\RouterInterface;
-use FOS\UserBundle\Model\User;
 use Twig\Environment;
 
 class UserManager extends BaseUserManager
 {
-    /**
-     * @var \FOS\UserBundle\Util\TokenGeneratorInterface
-     */
+    /** @var \FOS\UserBundle\Util\TokenGeneratorInterface */
     private $tokenGenerator;
+
     /** @var \Twig_Environment */
     private $twig;
+
     /** @var \Symfony\Component\Routing\RouterInterface */
     private $router;
+
+    /** @var \FOS\UserBundle\Mailer\MailerInterface */
+    private $userMailer;
+
     /** @var \Swift_Mailer */
     private $mailer;
+
     /** @var ContainerInterface */
     private $configuration;
 
@@ -45,6 +51,7 @@ class UserManager extends BaseUserManager
         TokenGeneratorInterface $tokenGenerator,
         Environment $twig,
         RouterInterface $router,
+        MailerInterface $userMailer,
         \Swift_Mailer $mailer,
         array $configuration
     ) {
@@ -52,6 +59,7 @@ class UserManager extends BaseUserManager
         $this->tokenGenerator = $tokenGenerator;
         $this->twig = $twig;
         $this->router = $router;
+        $this->userMailer = $userMailer;
         $this->mailer = $mailer;
         $this->configuration = $configuration;
     }
@@ -77,7 +85,7 @@ class UserManager extends BaseUserManager
         }
     }
 
-    public function notifyUserCreated(User $user, $andFlush = true)
+    public function notifyUserCreated(User $user, $andFlush = true, array $options = [])
     {
         if (null === $user->getConfirmationToken()) {
             // @var $tokenGenerator TokenGeneratorInterface
@@ -85,11 +93,11 @@ class UserManager extends BaseUserManager
         }
         $user->setPasswordRequestedAt(new \DateTime());
         $this->updateUser($user, $andFlush);
-        $message = $this->createUserCreatedMessage($user);
+        $message = $this->createUserCreatedMessage($user, $options);
         $this->mailer->send($message);
     }
 
-    private function createUserCreatedMessage(UserInterface $user)
+    private function createUserCreatedMessage(UserInterface $user, array $options = [])
     {
         $url = $this->router->generate('fos_user_resetting_reset', [
             'token' => $user->getConfirmationToken(),
@@ -106,8 +114,11 @@ class UserManager extends BaseUserManager
             + $this->configuration;
 
         $subject = $this->twig->createTemplate($config['subject'])->render($context);
-
         $header = $this->twig->createTemplate($config['header'])->render($context);
+        $message = $options['message'] ?? $config['message'] ?? null;
+        if (null !== $message) {
+            $message = $this->twig->createTemplate($message)->render($context);
+        }
         $body = $this->twig->createTemplate($config['body'])->render($context);
         $buttonText = $this->twig->createTemplate($config['button']['text'])->render($context);
         $footer = $this->twig->createTemplate($config['footer'])->render($context);
@@ -115,6 +126,7 @@ class UserManager extends BaseUserManager
         $body = $this->twig->render('@ItkDevUserManagement/email/user/user_created_user.html.twig', [
             'reset_password_url' => $url,
             'header' => $header,
+            'message' => $message,
             'body' => $body,
             'button' => [
                 'url' => $url,
@@ -127,6 +139,18 @@ class UserManager extends BaseUserManager
             ->setFrom($sender['email'], $sender['name'])
             ->setTo($user->getEmail())
             ->setBody($body, 'text/html');
+    }
+
+    public function resetPassword(UserInterface $user, $andFlush = true)
+    {
+        if (null === $user->getConfirmationToken()) {
+            // @var $tokenGenerator TokenGeneratorInterface
+            $user->setConfirmationToken($this->tokenGenerator->generateToken());
+        }
+        $user->setPasswordRequestedAt(new \DateTime());
+        $this->updateUser($user, $andFlush);
+
+        $this->userMailer->sendResettingEmailMessage($user);
     }
 
     public function findUsersBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null): array

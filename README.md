@@ -20,9 +20,19 @@ return [
 
 ## Configuration
 
+Use `bin/console config:dump-reference ItkDevUserManagementBundle` to see the
+configuration reference.
+
+## Example
+
 ```yaml
 itk_dev_user_management:
-    site_name: example.com
+    site_name: '%env(SITE_NAME)%'
+    site_url: '%env(SITE_URL)%'
+
+    sender:
+        email: '%env(MAILER_EMAIL)%'
+        name: '%env(MAILER_NAME)%'
 
     # Template for mails sent to new users
     user_created:

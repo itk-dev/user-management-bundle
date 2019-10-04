@@ -12,8 +12,10 @@ namespace ItkDev\UserManagementBundle\Command;
 
 use ItkDev\UserManagementBundle\Doctrine\UserManager;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
@@ -34,6 +36,7 @@ class NotifyUsersCreatedCommand extends Command
     {
         $this
             ->addArgument('user-name', InputArgument::OPTIONAL | InputArgument::IS_ARRAY, 'User names to notify')
+            ->addOption('message', null, InputOption::VALUE_REQUIRED, 'Additional message to include in email sent to users')
             ->setDescription('Notify new users (who have not yet logged in) about their account.');
     }
 
@@ -47,6 +50,8 @@ class NotifyUsersCreatedCommand extends Command
             return;
         }
         $userNames = $input->getArgument('user-name');
+        $message = $this->getMessage($input->getOption('message'));
+        $options = ['message' => $message];
         foreach ($users as $user) {
             if (!empty($userNames) && !\in_array($user->getUsername(), $userNames, true)) {
                 continue;
@@ -54,8 +59,24 @@ class NotifyUsersCreatedCommand extends Command
             $question = new ConfirmationQuestion(sprintf('Notify user %s? ', $user->getEmail()), false);
             if (!$input->isInteractive() || $helper->ask($input, $output, $question)) {
                 $output->writeln(sprintf('User %s notified.', $user->getEmail()));
-                $this->userManager->notifyUserCreated($user, true);
+                $this->userManager->notifyUserCreated($user, true, $options);
             }
         }
+    }
+
+    protected function getMessage(string $message)
+    {
+        if (null === $message) {
+            return null;
+        }
+        if (preg_match('/^@(?P<path>.+)/', $message, $matches)) {
+            $path = $matches['path'];
+            if (!is_readable($path)) {
+                throw new InvalidArgumentException(sprintf('Invalid message file name: %s', $path));
+            }
+            $message = file_get_contents($path);
+        }
+
+        return $message;
     }
 }
