@@ -64,7 +64,7 @@ class NotifyUsersCreatedCommand extends Command
         }
     }
 
-    protected function getMessage(string $message)
+    protected function getMessage(string $message = null)
     {
         if (null === $message) {
             return null;
