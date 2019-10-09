@@ -13,15 +13,21 @@
 </head>
 <body>
 <div class="container">
-    <div class="row justify-content-center mt-5 mb-3">
-        <div class="col-4 col-sm-2">
-            <img src="{{ logo_url }}" alt="{{ logo_alt }}" class="img-fluid">
+    {% if site_logo_url|default(false) %}
+        <div class="row justify-content-center mt-5 mb-3">
+            <div class="col-4 col-sm-2">
+                <img src="{{ site_logo_url }}" alt="{{ site_logo_alt ?? 'logo' }}" class="img-fluid">
+            </div>
         </div>
-    </div>
+    {% endif %}
     <div class="row justify-content-center">
         <div class="col col-sm-6">
-            <h1 class="text-center">{{ site_name }}</h1>
-            <p class="text-center lead mb-3">{{ site_description }} </p>
+            {% if site_name|default(false) %}
+                <h1 class="text-center">{{ site_name }}</h1>
+                {% if site_description|default(false) %}
+                    <p class="text-center lead mb-3">{{ site_description }} </p>
+                {% endif %}
+            {% endif %}
             {% block fos_user_content %}{% endblock %}
         </div>
     </div>

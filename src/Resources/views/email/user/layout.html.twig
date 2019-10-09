@@ -130,11 +130,11 @@
             </div>
         {% endif %}
 
-        {% if site_logo_path|default(false) %}
+        {% if site_logo_url|default(false) %}
         <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="600" style="margin: auto;" class="email-container" bgcolor="#003764">
             <tr>
                 <td style="padding: 20px 0; text-align: center">
-                    <img src="{{ site_url }}/{{ site_logo_path }}" width="108" height="24" alt="Logo" border="0" style="height: auto; background: #003764; font-family: sans-serif; font-size: 15px; line-height: 20px; color: #555555;">
+                    <img src="{{ site_logo_url }}" width="108" height="24" alt="Logo" border="0" style="height: auto; background: #003764; font-family: sans-serif; font-size: 15px; line-height: 20px; color: #555555;">
                 </td>
             </tr>
         </table>
