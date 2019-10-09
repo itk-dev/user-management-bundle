@@ -13,7 +13,20 @@
 </head>
 <body>
 <div class="container">
-    {% block fos_user_content %}{% endblock %}
+    <div class="row justify-content-center mt-5 mb-3">
+        <img src="//placehold.it/100x100&text=Logo" alt="Logo">
+        {# <img src="{{ site_url }}/{{ site_logo_path }}" alt="Logo"> #}
+
+    </div>
+    <div class="row justify-content-center">
+        <div class="col col-md-4">
+            <h1 class="text-center">Site name</h1>
+            {# <h1>{{ site_name }}</h1> #}
+            <p class="text-center lead mb-3">Lead text description</p>
+            {# <p class="text-center lead mb-3">{{ site_description }} </p>#}
+            {% block fos_user_content %}{% endblock %}
+        </div>
+    </div>
 </div>
 
 </body>
