@@ -18,6 +18,11 @@
             <argument key="$configuration"/>
         </service>
 
+        <service id="ItkDev\UserManagementBundle\Form\Type\UserRolesType" class="ItkDev\UserManagementBundle\Form\Type\UserRolesType">
+            <argument type="service" id="security.role_hierarchy"/>
+            <tag name="form.type"/>
+        </service>
+
         <service id="ItkDev\UserManagementBundle\Command\NotifyUsersCreatedCommand" class="ItkDev\UserManagementBundle\Command\NotifyUsersCreatedCommand">
             <argument type="service" id="ItkDev\UserManagementBundle\Doctrine\UserManager"/>
             <tag name="console.command"/>
