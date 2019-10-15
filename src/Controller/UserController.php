@@ -120,6 +120,16 @@ class UserController extends AdminController implements EventSubscriberInterface
             : $this->redirectToRoute('easyadmin', ['action' => 'edit', 'entity' => 'User', 'id' => $user->getId()]);
     }
 
+    public function impersonateAction()
+    {
+        $id = $this->request->query->get('id');
+        $easyadmin = $this->request->attributes->get('easyadmin');
+        $user = $easyadmin['item'];
+        $parameters = $this->isUser($user) ? ['_switch_user' => $user->getUsername()] : [];
+
+        return $this->redirectToRoute('easyadmin', $parameters);
+    }
+
     private function isUser($entity)
     {
         return is_a($entity, $this->userManager->getClass());
