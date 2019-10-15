@@ -79,10 +79,15 @@ class UserManager extends BaseUserManager
         $user->setUsername($user->getEmail());
         parent::updateUser($user, $andFlush);
 
-        if ($isNew && $this->configuration['notify_user_on_create']) {
+        if ($isNew && $this->getNotifyUserOnCreate()) {
             // @TODO: Add flash bag message here?
             $this->notifyUserCreated($user);
         }
+    }
+
+    public function getNotifyUserOnCreate()
+    {
+        return $this->configuration['notify_user_on_create'];
     }
 
     public function notifyUserCreated(User $user, $andFlush = true, array $options = [])
@@ -92,8 +97,10 @@ class UserManager extends BaseUserManager
             $user->setConfirmationToken($this->tokenGenerator->generateToken());
         }
         $user->setPasswordRequestedAt(new \DateTime());
-        $this->updateUser($user, $andFlush);
+        // We use parent here to prevent notifying user.
+        parent::updateUser($user, $andFlush);
         $message = $this->createUserCreatedMessage($user, $options);
+
         $this->mailer->send($message);
     }
 
