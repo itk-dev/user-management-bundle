@@ -77,3 +77,39 @@ fos_user:
 ```sh
 bin/console itk-dev:user-management:notify-users-created --help
 ```
+
+## Controller
+
+For convenience, you can use
+[`ItkDev\UserManagementBundle\Controller\UserController`](src/Controller/UserController.php)
+in your EasyAdminBundle configuration:
+
+```yaml
+easy_admin:
+    entities:
+        User:
+            class: App\Entity\User
+            controller: ItkDev\UserManagementBundle\Controller\UserController
+```
+
+### User roles form type
+
+When editing user roles, you can use
+[`ItkDev\UserManagementBundle\Form\Type\UserRolesType`](src/Form/Type/UserRolesType.php)
+to get a list of roles in the role hierarchy (only roles reachable from
+`options.base_roles`, which defaults to `[ROLE_ADMIN]`, are listed):
+
+```yaml
+easy_admin:
+    entities:
+        User:
+            …
+            form:
+                fields:
+                    …
+                    - property: roles
+                      type: ItkDev\UserManagementBundle\Form\Type\UserRolesType
+                      # Optionally, specify base roles:
+                      type_options:
+                          base_roles: [ROLE_ADMIN] # default
+```

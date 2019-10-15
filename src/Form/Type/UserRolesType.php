@@ -13,6 +13,7 @@ namespace ItkDev\UserManagementBundle\Form\Type;
 use Symfony\Component\Form\ChoiceList\Loader\CallbackChoiceLoader;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Role\RoleHierarchyInterface;
 
 class UserRolesType extends ChoiceType
@@ -29,13 +30,24 @@ class UserRolesType extends ChoiceType
 
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        $options['choice_loader'] = new CallbackChoiceLoader(function () {
+        $options['choice_loader'] = new CallbackChoiceLoader(function () use ($options) {
             // Note: We assume that all roles are reachable from ROLE_ADMIN.
-            $roles = $this->roleHierarchy->getReachableRoleNames(['ROLE_ADMIN']);
+            $roles = $this->roleHierarchy->getReachableRoleNames((array) $options['base_roles']);
 
             return array_combine($roles, $roles);
         });
 
         parent::buildForm($builder, $options);
+    }
+
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        parent::configureOptions($resolver);
+
+        $resolver->setDefaults([
+            'multiple' => true,
+            'expanded' => true,
+            'base_roles' => ['ROLE_ADMIN'],
+        ]);
     }
 }
